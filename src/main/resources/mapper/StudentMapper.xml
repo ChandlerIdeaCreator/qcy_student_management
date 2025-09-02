@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.codnoy.student.mapper.StudentMapper">
+
+    <select id="selectByCondition" resultType="cn.codnoy.student.entity.Student">
+        SELECT * FROM students
+        WHERE deleted = 0
+        <if test="query.name != null and query.name != ''">
+            AND name LIKE CONCAT('%', #{query.name}, '%')
+        </if>
+        <if test="query.gender != null and query.gender != ''">
+            AND gender = #{query.gender}
+        </if>
+        <if test="query.classId != null and query.classId != ''">
+            AND class_id = #{query.classId}
+        </if>
+        <if test="query.studentId != null and query.studentId != ''">
+            AND student_id = #{query.studentId}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

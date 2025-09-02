@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.codnoy.student.mapper.ScoreMapper">
+
+    <select id="selectByCondition" resultType="cn.codnoy.student.entity.Score">
+        SELECT s.* FROM scores s
+        WHERE s.deleted = 0
+        <if test="query.studentId != null">
+            AND s.student_id = #{query.studentId}
+        </if>
+        <if test="query.courseId != null">
+            AND s.course_id = #{query.courseId}
+        </if>
+        <if test="query.teacherId != null">
+            AND s.teacher_id = #{query.teacherId}
+        </if>
+        <if test="query.semester != null and query.semester != ''">
+            AND s.semester = #{query.semester}
+        </if>
+        ORDER BY s.exam_date DESC
+    </select>
+
+    <select id="selectCourseScoreStats" resultType="cn.codnoy.student.vo.CourseScoreVO">
+        SELECT
+        st.name AS studentName,
+        st.student_id AS studentId,
+        c.class_name AS className,
+        sc.score,
+        CASE
+        WHEN sc.score >= 90 THEN 'A'
+        WHEN sc.score >= 80 THEN 'B'
+        WHEN sc.score >= 70 THEN 'C'
+        WHEN sc.score >= 60 THEN 'D'
+        ELSE 'F'
+        END AS gradeLevel
+        FROM scores sc
+        JOIN students st ON sc.student_id = st.id
+        JOIN classes c ON st.class_id = c.id
+        WHERE sc.course_id = #{courseId}
+        AND sc.semester = #{semester}
+        AND sc.deleted = 0
+        ORDER BY sc.score DESC
+    </select>
+
+    <select id="selectStudentScoreStats" resultType="cn.codnoy.student.vo.StudentScoreVO">
+        SELECT
+        co.course_name AS courseName,
+        co.course_code AS courseCode,
+        co.credit,
+        sc.score,
+        sc.semester,
+        te.name AS teacherName
+        FROM scores sc
+        JOIN courses co ON sc.course_id = co.id
+        JOIN teachers te ON sc.teacher_id = te.id
+        WHERE sc.student_id = #{studentId}
+        AND sc.deleted = 0
+        ORDER BY sc.semester DESC, co.course_name
+    </select>
+
+    <select id="selectScoreStatistics" resultType="cn.codnoy.student.vo.ScoreStatVO">
+        SELECT
+        AVG(score) AS avgScore,
+        MAX(score) AS maxScore,
+        MIN(score) AS minScore,
+        SUM(CASE WHEN score >= 60 THEN 1 ELSE 0 END) AS passCount,
+        SUM(CASE WHEN score &lt; 60 THEN 1 ELSE 0 END) AS failCount,
+        SUM(CASE WHEN score >= 90 THEN 1 ELSE 0 END) AS aCount,
+        SUM(CASE WHEN score >= 80 AND score &lt; 90 THEN 1 ELSE 0 END) AS bCount,
+        SUM(CASE WHEN score >= 70 AND score &lt; 80 THEN 1 ELSE 0 END) AS cCount,
+        SUM(CASE WHEN score >= 60 AND score &lt; 70 THEN 1 ELSE 0 END) AS dCount,
+        SUM(CASE WHEN score &lt; 60 THEN 1 ELSE 0 END) AS fCount
+        FROM scores
+        WHERE course_id = #{courseId}
+        AND semester = #{semester}
+        AND deleted = 0
+    </select>
+
+    <select id="countByStudentAndCourse" resultType="int">
+        SELECT COUNT(*) FROM scores
+        WHERE student_id = #{studentId}
+        AND course_id = #{courseId}
+        AND semester = #{semester}
+        AND deleted = 0
+    </select>
+
+</mapper>

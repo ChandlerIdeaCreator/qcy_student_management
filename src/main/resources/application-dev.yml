@@ -1,0 +1,67 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /student-api
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://115.175.139.58:3388/school_management?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: neuq_168
+    password: neuq168168
+
+# MyBatis配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml  # XML文件位置
+  type-aliases-package: cn.codnoy.student.entity  # 实体类所在包
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志
+  global-config:
+    db-config:
+      id-type: auto # 主键自增
+      logic-delete-field: deleted # 逻辑删除字段
+      logic-delete-value: 1 # 逻辑已删除值
+      logic-not-delete-value: 0 # 逻辑未删除值
+
+management:
+  endpoints:
+    web:
+      base-path: /rest/actuator
+      exposure:
+        include: '*'
+
+# Swagger配置
+swagger:
+  enable: true
+  title: 学籍管理系统API文档 - 开发环境
+  description: 学籍管理系统开发环境接口文档
+  version: 1.0.0
+  base-package: cn.codnoy.student.controller
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+    use-root-path: true
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  show-actuator: true
+  group-configs:
+    - group: student
+      paths-to-match: /students/**
+    - group: classe
+      paths-to-match: /classes/**
+    - group: course
+      paths-to-match: /courses/**
+    - group: score
+      paths-to-match: /scores/**
+    - group: teacher
+      paths-to-match: /teachers/**
+    - group: teaching-assignment
+      paths-to-match: /teaching-assignments/**
+  cache:
+    disabled: true

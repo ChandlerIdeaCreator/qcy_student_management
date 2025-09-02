@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.codnoy.student.mapper.TeacherAssignmentMapper">
+
+    <!-- 基础查询结果映射 -->
+    <resultMap id="BaseResultMap" type="cn.codnoy.student.entity.TeacherAssignment">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="teacher_id" property="teacherId" jdbcType="BIGINT"/>
+        <result column="course_id" property="courseId" jdbcType="BIGINT"/>
+        <result column="semester" property="semester" jdbcType="VARCHAR"/>
+        <result column="classroom" property="classroom" jdbcType="VARCHAR"/>
+        <result column="schedule" property="schedule" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="deleted" property="deleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 多条件分页查询授课安排 -->
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        SELECT
+        ta.*,
+        t.name AS teacher_name,
+        c.course_name,
+        c.course_code
+        FROM
+        teaching_assignments ta
+        LEFT JOIN
+        teachers t ON ta.teacher_id = t.id
+        LEFT JOIN
+        courses c ON ta.course_id = c.id
+        WHERE
+        ta.deleted = 0
+        <if test="query.teacherId != null">
+            AND ta.teacher_id = #{query.teacherId}
+        </if>
+        <if test="query.courseId != null">
+            AND ta.course_id = #{query.courseId}
+        </if>
+        <if test="query.semester != null and query.semester != ''">
+            AND ta.semester = #{query.semester}
+        </if>
+        <if test="query.classroom != null and query.classroom != ''">
+            AND ta.classroom LIKE CONCAT('%', #{query.classroom}, '%')
+        </if>
+        ORDER BY
+        ta.semester DESC,
+        ta.classroom ASC
+    </select>
+
+    <!-- 检查教师授课时间冲突 -->
+    <select id="countTeacherScheduleConflict" resultType="int">
+        SELECT
+        COUNT(*)
+        FROM
+        teaching_assignments
+        WHERE
+        teacher_id = #{teacherId}
+        AND semester = #{semester}
+        AND schedule = #{schedule}
+        AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+<!--    &lt;!&ndash; 检查教室占用冲突 &ndash;&gt;-->
+<!--    <select id="countClassroomConflict" resultType="int">-->
+<!--        SELECT-->
+<!--        COUNT(*)-->
+<!--        FROM-->
+<!--        teaching_assignments-->
+<!--        WHERE-->
+<!--        classroom = #{classroom}-->
+<!--        AND semester = #{semester}-->
+<!--        AND schedule = #{schedule}-->
+<!--        AND deleted = 0-->
+<!--        <if test="excludeId != null">-->
+<!--            AND id != #{excludeId}-->
+<!--        </if>-->
+<!--    </select>-->
+
+<!--    &lt;!&ndash; 检查是否有成绩记录 &ndash;&gt;-->
+<!--    <select id="checkIfHasScores" resultType="int">-->
+<!--        SELECT-->
+<!--        COUNT(*)-->
+<!--        FROM-->
+<!--        scores-->
+<!--        WHERE-->
+<!--        teaching_assignment_id = #{assignmentId}-->
+<!--        AND deleted = 0-->
+<!--    </select>-->
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.codnoy.student.mapper.ClassMapper">
+
+    <select id="selectByCondition" resultType="cn.codnoy.student.entity.Class">
+        SELECT * FROM classes
+        WHERE deleted = 0
+        <if test="query.className != null and query.className != ''">
+            AND class_name LIKE CONCAT('%', #{query.className}, '%')
+        </if>
+        <if test="query.grade != null">
+            AND grade = #{query.grade}
+        </if>
+        <if test="query.headTeacher != null and query.headTeacher != ''">
+            AND head_teacher LIKE CONCAT('%', #{query.headTeacher}, '%')
+        </if>
+        ORDER BY grade, class_name
+    </select>
+
+    <update id="updateStudentCount">
+        UPDATE classes
+        SET student_count = student_count + #{count}
+        WHERE class_id = #{classId} AND deleted = 0
+    </update>
+
+</mapper>

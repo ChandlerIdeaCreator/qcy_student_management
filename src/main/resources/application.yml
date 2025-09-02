@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    active: @activatedProperties@  # 使用maven的profile动态激活环境
+
+# 全局配置
+app:
+  name: student-management
+  version: 1.0.0
